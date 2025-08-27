@@ -1,0 +1,361 @@
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+        Dashboard Overview
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-download me-1"></i>
+                Export Report
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary">
+            <i class="fas fa-sync-alt me-1"></i>
+            Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="icon" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>{{stats.totalUsers}}</h3>
+            <p>Total Users</p>
+            <small class="text-muted">
+                <i class="fas fa-user-graduate me-1"></i>
+                {{stats.totalStudents}} Students
+            </small>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="icon" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+                <i class="fas fa-book"></i>
+            </div>
+            <h3>{{stats.totalCourses}}</h3>
+            <p>Active Courses</p>
+            <small class="text-muted">
+                <i class="fas fa-chart-line me-1"></i>
+                Biology Subjects
+            </small>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="icon" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <h3>{{stats.totalMaterials}}</h3>
+            <p>Learning Materials</p>
+            <small class="text-muted">
+                <i class="fas fa-upload me-1"></i>
+                PDFs, Videos, Docs
+            </small>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stats-card">
+            <div class="icon" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                <i class="fas fa-video"></i>
+            </div>
+            <h3>{{stats.totalSessions}}</h3>
+            <p>Zoom Sessions</p>
+            <small class="text-muted">
+                <i class="fas fa-calendar me-1"></i>
+                This Month
+            </small>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row mb-4">
+    <!-- Course Materials Distribution -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Materials by Course
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="courseMaterialsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Activity -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    User Activity (Last 7 Days)
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="userActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity and Quick Actions -->
+<div class="row">
+    <!-- Recent Activities -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Recent Activities
+                </h5>
+            </div>
+            <div class="card-body">
+                {{#if recentActivities}}
+                    {{#each recentActivities}}
+                    <div class="activity-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{user_name}}</strong>
+                                <span class="text-muted">{{action}}</span>
+                                {{#if details}}
+                                <br>
+                                <small class="text-muted">{{details}}</small>
+                                {{/if}}
+                            </div>
+                            <small class="text-muted">{{formatDateTime created_at}}</small>
+                        </div>
+                    </div>
+                    {{/each}}
+                {{else}}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No recent activities</p>
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="/admin/users?action=add" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Add New User
+                    </a>
+                    <a href="/admin/materials?action=upload" class="btn btn-outline-success">
+                        <i class="fas fa-upload me-2"></i>
+                        Upload Material
+                    </a>
+                    <a href="/admin/sessions?action=create" class="btn btn-outline-info">
+                        <i class="fas fa-video me-2"></i>
+                        Schedule Session
+                    </a>
+                    <a href="/admin/analytics" class="btn btn-outline-warning">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        View Analytics
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- System Status -->
+                <h6 class="mb-3">
+                    <i class="fas fa-server me-2"></i>
+                    System Status
+                </h6>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Database</span>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>File Storage</span>
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Zoom API</span>
+                        <span class="badge bg-warning">Testing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Course Statistics Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    Course Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Materials</th>
+                                <th>Sessions</th>
+                                <th>Students</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each courseStats}}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle me-2" 
+                                             style="width: 12px; height: 12px; background-color: {{color}};"></div>
+                                        <strong>{{name}}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{material_count}}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{session_count}}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{student_count}}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Active</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/courses/{{id}}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="/admin/courses/{{id}}/edit" class="btn btn-outline-secondary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Course Materials Chart
+    const courseMaterialsCtx = document.getElementById('courseMaterialsChart').getContext('2d');
+    new Chart(courseMaterialsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {{#each courseStats}}
+                '{{name}}'{{#unless @last}},{{/unless}}
+                {{/each}}
+            ],
+            datasets: [{
+                data: [
+                    {{#each courseStats}}
+                    {{material_count}}{{#unless @last}},{{/unless}}
+                    {{/each}}
+                ],
+                backgroundColor: [
+                    {{#each courseStats}}
+                    '{{color}}'{{#unless @last}},{{/unless}}
+                    {{/each}}
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+
+    // User Activity Chart (Mock data for now)
+    const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+    new Chart(userActivityCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Active Users',
+                data: [12, 19, 15, 25, 22, 18, 24],
+                borderColor: '#2c5aa0',
+                backgroundColor: 'rgba(44, 90, 160, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

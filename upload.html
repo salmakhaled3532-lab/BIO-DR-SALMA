@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload - Dr. Salma Biology Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .upload-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #2c5aa0, #4a90e2);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(44, 90, 160, 0.3);
+        }
+
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .drag-drop-area {
+            border: 3px dashed #2c5aa0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        }
+
+        .drag-drop-area:hover,
+        .drag-drop-area.dragover {
+            border-color: #4a90e2;
+            background: linear-gradient(45deg, #e3f2fd, #bbdefb);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(44, 90, 160, 0.2);
+        }
+
+        .drag-drop-area i {
+            font-size: 4rem;
+            color: #2c5aa0;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .upload-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .file-preview {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #2c5aa0;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .file-info h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+
+        .file-info p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .files-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin: 10px 0;
+            color: #2c5aa0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: #28a745;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .drag-drop-area {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-microscope"></i>
+                Dr. Salma Biology
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link active">Upload Files</a>
+                <a href="#files" class="nav-link">My Files</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="upload-container">
+        <!-- Header -->
+        <div class="upload-header">
+            <h1><i class="fas fa-cloud-upload-alt"></i> File Upload Center</h1>
+            <p>Upload your biology materials - Videos, PDFs, Documents, and Images</p>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <i class="fas fa-file-alt" style="font-size: 2rem; color: #2c5aa0;"></i>
+                <h3 id="totalFiles">0</h3>
+                <p>Total Files</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-hdd" style="font-size: 2rem; color: #28a745;"></i>
+                <h3 id="totalSize">0 MB</h3>
+                <p>Storage Used</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-video" style="font-size: 2rem; color: #dc3545;"></i>
+                <h3 id="videoCount">0</h3>
+                <p>Videos</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-pdf" style="font-size: 2rem; color: #fd7e14;"></i>
+                <h3 id="pdfCount">0</h3>
+                <p>PDFs</p>
+            </div>
+        </div>
+
+        <div class="upload-grid">
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <h2><i class="fas fa-upload"></i> Upload New File</h2>
+                
+                <form id="uploadForm">
+                    <div class="drag-drop-area" id="dragDropArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Drag & Drop Files Here</h3>
+                        <p>or click to browse</p>
+                        <p class="text-muted">Supported: PDF, DOC, PPT, MP4, AVI, MOV, JPG, PNG</p>
+                    </div>
+                    
+                    <input type="file" id="fileInput" class="file-input" 
+                           accept=".pdf,.doc,.docx,.ppt,.pptx,.mp4,.avi,.mov,.wmv,.jpg,.jpeg,.png,.gif,.txt" multiple>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="fileTitle">Title:</label>
+                        <input type="text" id="fileTitle" class="form-control" placeholder="Enter file title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fileDescription">Description:</label>
+                        <textarea id="fileDescription" class="form-control" rows="3" placeholder="Enter file description"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fileCategory">Category:</label>
+                        <select id="fileCategory" class="form-control">
+                            <option value="general">General</option>
+                            <option value="biochemistry">Biochemistry</option>
+                            <option value="cell-biology">Cell Biology</option>
+                            <option value="animal-behavior">Animal Behavior</option>
+                            <option value="evolution">Evolution</option>
+                            <option value="photosynthesis">Photosynthesis</option>
+                            <option value="assignments">Assignments</option>
+                            <option value="lectures">Lectures</option>
+                        </select>
+                    </div>
+                    
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    
+                    <button type="submit" class="upload-btn" id="uploadBtn">
+                        <i class="fas fa-upload"></i> Upload File
+                    </button>
+                </form>
+                
+                <div id="filePreview"></div>
+            </div>
+
+            <!-- File Management Section -->
+            <div class="upload-section">
+                <h2><i class="fas fa-folder-open"></i> File Management</h2>
+                
+                <div class="form-group">
+                    <input type="text" id="searchFiles" class="form-control" placeholder="Search files...">
+                </div>
+                
+                <div class="form-group">
+                    <select id="filterCategory" class="form-control">
+                        <option value="all">All Categories</option>
+                        <option value="general">General</option>
+                        <option value="biochemistry">Biochemistry</option>
+                        <option value="cell-biology">Cell Biology</option>
+                        <option value="animal-behavior">Animal Behavior</option>
+                        <option value="evolution">Evolution</option>
+                        <option value="photosynthesis">Photosynthesis</option>
+                        <option value="assignments">Assignments</option>
+                        <option value="lectures">Lectures</option>
+                    </select>
+                </div>
+                
+                <div class="files-list" id="filesList">
+                    <p class="text-center text-muted">No files uploaded yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Global variables
+        let selectedFiles = [];
+        let allFiles = [];
+
+        // DOM elements
+        const dragDropArea = document.getElementById('dragDropArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const filePreview = document.getElementById('filePreview');
+        const filesList = document.getElementById('filesList');
+        const searchFiles = document.getElementById('searchFiles');
+        const filterCategory = document.getElementById('filterCategory');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+            loadStats();
+            
+            // Set up event listeners
+            dragDropArea.addEventListener('click', () => fileInput.click());
+            dragDropArea.addEventListener('dragover', handleDragOver);
+            dragDropArea.addEventListener('dragleave', handleDragLeave);
+            dragDropArea.addEventListener('drop', handleDrop);
+            fileInput.addEventListener('change', handleFileSelect);
+            uploadForm.addEventListener('submit', handleUpload);
+            searchFiles.addEventListener('input', filterFiles);
+            filterCategory.addEventListener('change', filterFiles);
+        });
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            dragDropArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            dragDropArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dragDropArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            selectedFiles = files;
+            displayFilePreview(files);
+        }
+
+        function displayFilePreview(files) {
+            filePreview.innerHTML = '';
+            files.forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'file-preview';
+                
+                const icon = getFileIcon(file.name);
+                const size = formatFileSize(file.size);
+                
+                fileDiv.innerHTML = `
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-info">
+                        <h4>${file.name}</h4>
+                        <p>Size: ${size} | Type: ${file.type || 'Unknown'}</p>
+                    </div>
+                `;
+                
+                filePreview.appendChild(fileDiv);
+            });
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '<i class="fas fa-file-pdf" style="color: #dc3545;"></i>',
+                'doc': '<i class="fas fa-file-word" style="color: #2c5aa0;"></i>',
+                'docx': '<i class="fas fa-file-word" style="color: #2c5aa0;"></i>',
+                'ppt': '<i class="fas fa-file-powerpoint" style="color: #fd7e14;"></i>',
+                'pptx': '<i class="fas fa-file-powerpoint" style="color: #fd7e14;"></i>',
+                'mp4': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'avi': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'mov': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'wmv': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'jpg': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'jpeg': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'png': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'gif': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'txt': '<i class="fas fa-file-alt" style="color: #6c757d;"></i>'
+            };
+            return icons[ext] || '<i class="fas fa-file" style="color: #6c757d;"></i>';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        async function handleUpload(e) {
+            e.preventDefault();
+            
+            if (selectedFiles.length === 0) {
+                showNotification('Please select files to upload', 'error');
+                return;
+            }
+
+            uploadBtn.disabled = true;
+            progressBar.style.display = 'block';
+            
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const formData = new FormData();
+                
+                formData.append('file', file);
+                formData.append('title', document.getElementById('fileTitle').value || file.name);
+                formData.append('description', document.getElementById('fileDescription').value);
+                formData.append('category', document.getElementById('fileCategory').value);
+                
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const progress = ((i + 1) / selectedFiles.length) * 100;
+                        progressFill.style.width = progress + '%';
+                        
+                        if (i === selectedFiles.length - 1) {
+                            showNotification('Files uploaded successfully!', 'success');
+                            uploadForm.reset();
+                            filePreview.innerHTML = '';
+                            selectedFiles = [];
+                            loadFiles();
+                            loadStats();
+                        }
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    showNotification('Upload failed: ' + error.message, 'error');
+                    break;
+                }
+            }
+            
+            uploadBtn.disabled = false;
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            }, 1000);
+        }
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/files');
+                const result = await response.json();
+                
+                if (result.success) {
+                    allFiles = result.files;
+                    displayFiles(allFiles);
+                }
+            } catch (error) {
+                console.error('Failed to load files:', error);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const stats = result.stats;
+                    document.getElementById('totalFiles').textContent = stats.totalFiles;
+                    document.getElementById('totalSize').textContent = stats.formattedTotalSize;
+                    document.getElementById('videoCount').textContent = (stats.fileTypes.mp4 || 0) + (stats.fileTypes.avi || 0) + (stats.fileTypes.mov || 0) + (stats.fileTypes.wmv || 0);
+                    document.getElementById('pdfCount').textContent = stats.fileTypes.pdf || 0;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        function displayFiles(files) {
+            if (files.length === 0) {
+                filesList.innerHTML = '<p class="text-center text-muted">No files found</p>';
+                return;
+            }
+            
+            filesList.innerHTML = files.map(file => `
+                <div class="file-item">
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        <div class="file-icon" style="margin-right: 15px;">
+                            ${getFileIcon(file.originalName)}
+                        </div>
+                        <div class="file-info">
+                            <h4 style="margin: 0 0 5px 0;">${file.title}</h4>
+                            <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">
+                                ${file.formattedSize} • ${file.category} • ${new Date(file.uploadDate).toLocaleDateString()}
+                            </p>
+                            ${file.description ? `<p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #6c757d;">${file.description}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn-sm btn-primary" onclick="downloadFile('${file.id}')">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="btn-sm btn-danger" onclick="deleteFile('${file.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterFiles() {
+            const search = searchFiles.value.toLowerCase();
+            const category = filterCategory.value;
+            
+            let filtered = allFiles;
+            
+            if (category !== 'all') {
+                filtered = filtered.filter(file => file.category === category);
+            }
+            
+            if (search) {
+                filtered = filtered.filter(file => 
+                    file.title.toLowerCase().includes(search) ||
+                    file.description.toLowerCase().includes(search) ||
+                    file.originalName.toLowerCase().includes(search)
+                );
+            }
+            
+            displayFiles(filtered);
+        }
+
+        async function downloadFile(fileId) {
+            try {
+                window.open(`/api/download/${fileId}`, '_blank');
+                showNotification('Download started', 'success');
+            } catch (error) {
+                showNotification('Download failed', 'error');
+            }
+        }
+
+        async function deleteFile(fileId) {
+            if (!confirm('Are you sure you want to delete this file?')) return;
+            
+            try {
+                const response = await fetch(`/api/delete/${fileId}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showNotification('File deleted successfully', 'success');
+                    loadFiles();
+                    loadStats();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                showNotification('Delete failed: ' + error.message, 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

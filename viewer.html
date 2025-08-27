@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Viewer - Dr. Salma Biology Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .viewer-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+            min-height: 100vh;
+        }
+
+        .viewer-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, #2c5aa0, #4a90e2);
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(44, 90, 160, 0.3);
+        }
+
+        .viewer-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .file-sidebar {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            height: fit-content;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .viewer-main {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .file-item:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+
+        .file-item.active {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2c5aa0;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .file-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .file-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .media-viewer {
+            width: 100%;
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .media-viewer video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .media-viewer iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .media-viewer img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .media-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #2c5aa0, #4a90e2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 90, 160, 0.3);
+        }
+
+        .control-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+        }
+
+        .slide-counter {
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #1e3d72;
+        }
+
+        .nav-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .file-details {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .file-details h3 {
+            margin: 0 0 10px 0;
+            color: #2c5aa0;
+        }
+
+        .file-details p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+
+        .empty-viewer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 500px;
+            color: #6c757d;
+        }
+
+        .empty-viewer i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #dee2e6;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2c5aa0;
+        }
+
+        .category-filter {
+            margin-bottom: 20px;
+        }
+
+        .category-filter select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .presentation-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1000;
+            display: none;
+        }
+
+        .presentation-mode.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .presentation-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .viewer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .file-sidebar {
+                max-height: 300px;
+            }
+            
+            .media-viewer {
+                height: 300px;
+            }
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-microscope"></i>
+                Dr. Salma Biology
+            </div>
+            <div class="nav-menu">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/upload" class="nav-link">Upload</a>
+                <a href="/viewer" class="nav-link active">Viewer</a>
+                <a href="/login" class="nav-link">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="viewer-container">
+        <!-- Header -->
+        <div class="viewer-header">
+            <h1><i class="fas fa-play-circle"></i> Media Viewer & Presentation</h1>
+            <p>View and present your biology materials - Videos, PDFs, and Documents</p>
+        </div>
+
+        <div class="viewer-grid">
+            <!-- File Sidebar -->
+            <div class="file-sidebar">
+                <h3><i class="fas fa-folder-open"></i> Your Files</h3>
+                
+                <div class="search-box">
+                    <input type="text" id="searchFiles" placeholder="Search files...">
+                </div>
+                
+                <div class="category-filter">
+                    <select id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        <option value="general">General</option>
+                        <option value="biochemistry">Biochemistry</option>
+                        <option value="cell-biology">Cell Biology</option>
+                        <option value="animal-behavior">Animal Behavior</option>
+                        <option value="evolution">Evolution</option>
+                        <option value="photosynthesis">Photosynthesis</option>
+                        <option value="assignments">Assignments</option>
+                        <option value="lectures">Lectures</option>
+                    </select>
+                </div>
+                
+                <div id="filesList">
+                    <p class="text-center text-muted">Loading files...</p>
+                </div>
+            </div>
+
+            <!-- Main Viewer -->
+            <div class="viewer-main">
+                <div class="media-viewer" id="mediaViewer">
+                    <div class="empty-viewer">
+                        <i class="fas fa-file-video"></i>
+                        <h3>Select a file to view</h3>
+                        <p>Choose a video, PDF, or image from the sidebar</p>
+                    </div>
+                    <button class="fullscreen-btn" id="fullscreenBtn" style="display: none;">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+
+                <div class="media-controls" id="mediaControls" style="display: none;">
+                    <button class="control-btn" id="playPauseBtn">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                    <button class="control-btn" id="downloadBtn">
+                        <i class="fas fa-download"></i> Download
+                    </button>
+                    <button class="control-btn" id="presentationBtn">
+                        <i class="fas fa-desktop"></i> Present
+                    </button>
+                </div>
+
+                <div class="slide-navigation" id="slideNavigation" style="display: none;">
+                    <div class="slide-counter">
+                        <span id="currentSlide">1</span> of <span id="totalSlides">1</span>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="nav-btn" id="prevBtn">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </button>
+                        <button class="nav-btn" id="nextBtn">
+                            Next <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="file-details" id="fileDetails" style="display: none;">
+                    <h3 id="fileName">File Name</h3>
+                    <p><strong>Category:</strong> <span id="fileCategory">-</span></p>
+                    <p><strong>Size:</strong> <span id="fileSize">-</span></p>
+                    <p><strong>Uploaded:</strong> <span id="fileDate">-</span></p>
+                    <p><strong>Description:</strong> <span id="fileDescription">-</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Presentation Mode -->
+    <div class="presentation-mode" id="presentationMode">
+        <div id="presentationContent"></div>
+        <div class="presentation-controls">
+            <button class="control-btn" id="prevSlideBtn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="control-btn" id="exitPresentationBtn">
+                <i class="fas fa-times"></i> Exit
+            </button>
+            <button class="control-btn" id="nextSlideBtn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allFiles = [];
+        let currentFiles = [];
+        let currentFileIndex = 0;
+        let currentFile = null;
+        let isPresenting = false;
+
+        // DOM elements
+        const filesList = document.getElementById('filesList');
+        const mediaViewer = document.getElementById('mediaViewer');
+        const mediaControls = document.getElementById('mediaControls');
+        const slideNavigation = document.getElementById('slideNavigation');
+        const fileDetails = document.getElementById('fileDetails');
+        const searchFiles = document.getElementById('searchFiles');
+        const categoryFilter = document.getElementById('categoryFilter');
+        const presentationMode = document.getElementById('presentationMode');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            searchFiles.addEventListener('input', filterFiles);
+            categoryFilter.addEventListener('change', filterFiles);
+            
+            document.getElementById('playPauseBtn').addEventListener('click', togglePlayPause);
+            document.getElementById('downloadBtn').addEventListener('click', downloadCurrentFile);
+            document.getElementById('presentationBtn').addEventListener('click', startPresentation);
+            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
+            
+            document.getElementById('prevBtn').addEventListener('click', () => navigateSlide(-1));
+            document.getElementById('nextBtn').addEventListener('click', () => navigateSlide(1));
+            
+            document.getElementById('prevSlideBtn').addEventListener('click', () => navigateSlide(-1));
+            document.getElementById('nextSlideBtn').addEventListener('click', () => navigateSlide(1));
+            document.getElementById('exitPresentationBtn').addEventListener('click', exitPresentation);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/files');
+                const result = await response.json();
+                
+                if (result.success) {
+                    allFiles = result.files;
+                    currentFiles = allFiles;
+                    displayFiles(currentFiles);
+                }
+            } catch (error) {
+                console.error('Failed to load files:', error);
+                filesList.innerHTML = '<p class="text-center text-muted">Failed to load files</p>';
+            }
+        }
+
+        function displayFiles(files) {
+            if (files.length === 0) {
+                filesList.innerHTML = '<p class="text-center text-muted">No files found</p>';
+                return;
+            }
+            
+            filesList.innerHTML = files.map((file, index) => `
+                <div class="file-item" onclick="selectFile(${index})" data-index="${index}">
+                    <div class="file-icon">
+                        ${getFileIcon(file.originalName)}
+                    </div>
+                    <div class="file-info">
+                        <h4>${file.title}</h4>
+                        <p>${file.formattedSize} • ${file.category}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                'pdf': '<i class="fas fa-file-pdf" style="color: #dc3545;"></i>',
+                'doc': '<i class="fas fa-file-word" style="color: #2c5aa0;"></i>',
+                'docx': '<i class="fas fa-file-word" style="color: #2c5aa0;"></i>',
+                'ppt': '<i class="fas fa-file-powerpoint" style="color: #fd7e14;"></i>',
+                'pptx': '<i class="fas fa-file-powerpoint" style="color: #fd7e14;"></i>',
+                'mp4': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'avi': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'mov': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'wmv': '<i class="fas fa-file-video" style="color: #6f42c1;"></i>',
+                'jpg': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'jpeg': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'png': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'gif': '<i class="fas fa-file-image" style="color: #28a745;"></i>',
+                'txt': '<i class="fas fa-file-alt" style="color: #6c757d;"></i>'
+            };
+            return icons[ext] || '<i class="fas fa-file" style="color: #6c757d;"></i>';
+        }
+
+        function selectFile(index) {
+            // Update active file
+            document.querySelectorAll('.file-item').forEach(item => item.classList.remove('active'));
+            document.querySelector(`[data-index="${index}"]`).classList.add('active');
+            
+            currentFileIndex = index;
+            currentFile = currentFiles[index];
+            
+            displayFile(currentFile);
+            updateFileDetails(currentFile);
+            updateSlideNavigation();
+        }
+
+        function displayFile(file) {
+            const ext = file.originalName.split('.').pop().toLowerCase();
+            const downloadUrl = `/api/download/${file.id}`;
+            
+            mediaViewer.innerHTML = '';
+            
+            if (['mp4', 'avi', 'mov', 'wmv'].includes(ext)) {
+                // Video file
+                const video = document.createElement('video');
+                video.src = downloadUrl;
+                video.controls = true;
+                video.style.width = '100%';
+                video.style.height = '100%';
+                mediaViewer.appendChild(video);
+                
+                document.getElementById('playPauseBtn').style.display = 'flex';
+            } else if (ext === 'pdf') {
+                // PDF file
+                const iframe = document.createElement('iframe');
+                iframe.src = downloadUrl;
+                iframe.style.width = '100%';
+                iframe.style.height = '100%';
+                mediaViewer.appendChild(iframe);
+                
+                document.getElementById('playPauseBtn').style.display = 'none';
+            } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                // Image file
+                const img = document.createElement('img');
+                img.src = downloadUrl;
+                img.alt = file.title;
+                mediaViewer.appendChild(img);
+                
+                document.getElementById('playPauseBtn').style.display = 'none';
+            } else {
+                // Other files - show download option
+                mediaViewer.innerHTML = `
+                    <div class="empty-viewer">
+                        <i class="fas fa-file-download"></i>
+                        <h3>${file.title}</h3>
+                        <p>Click download to view this file</p>
+                    </div>
+                `;
+                document.getElementById('playPauseBtn').style.display = 'none';
+            }
+            
+            // Add fullscreen button
+            const fullscreenBtn = document.createElement('button');
+            fullscreenBtn.className = 'fullscreen-btn';
+            fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+            fullscreenBtn.onclick = toggleFullscreen;
+            mediaViewer.appendChild(fullscreenBtn);
+            
+            // Show controls
+            mediaControls.style.display = 'flex';
+            slideNavigation.style.display = 'flex';
+            fileDetails.style.display = 'block';
+        }
+
+        function updateFileDetails(file) {
+            document.getElementById('fileName').textContent = file.title;
+            document.getElementById('fileCategory').textContent = file.category;
+            document.getElementById('fileSize').textContent = file.formattedSize;
+            document.getElementById('fileDate').textContent = new Date(file.uploadDate).toLocaleDateString();
+            document.getElementById('fileDescription').textContent = file.description || 'No description';
+        }
+
+        function updateSlideNavigation() {
+            document.getElementById('currentSlide').textContent = currentFileIndex + 1;
+            document.getElementById('totalSlides').textContent = currentFiles.length;
+            
+            document.getElementById('prevBtn').disabled = currentFileIndex === 0;
+            document.getElementById('nextBtn').disabled = currentFileIndex === currentFiles.length - 1;
+        }
+
+        function navigateSlide(direction) {
+            const newIndex = currentFileIndex + direction;
+            if (newIndex >= 0 && newIndex < currentFiles.length) {
+                selectFile(newIndex);
+            }
+        }
+
+        function filterFiles() {
+            const search = searchFiles.value.toLowerCase();
+            const category = categoryFilter.value;
+            
+            let filtered = allFiles;
+            
+            if (category !== 'all') {
+                filtered = filtered.filter(file => file.category === category);
+            }
+            
+            if (search) {
+                filtered = filtered.filter(file => 
+                    file.title.toLowerCase().includes(search) ||
+                    file.description.toLowerCase().includes(search) ||
+                    file.originalName.toLowerCase().includes(search)
+                );
+            }
+            
+            currentFiles = filtered;
+            displayFiles(currentFiles);
+            
+            // Reset selection if current file is not in filtered results
+            if (currentFile && !currentFiles.includes(currentFile)) {
+                currentFile = null;
+                currentFileIndex = 0;
+                mediaViewer.innerHTML = `
+                    <div class="empty-viewer">
+                        <i class="fas fa-file-video"></i>
+                        <h3>Select a file to view</h3>
+                        <p>Choose a video, PDF, or image from the sidebar</p>
+                    </div>
+                `;
+                mediaControls.style.display = 'none';
+                slideNavigation.style.display = 'none';
+                fileDetails.style.display = 'none';
+            }
+        }
+
+        function togglePlayPause() {
+            const video = mediaViewer.querySelector('video');
+            if (video) {
+                if (video.paused) {
+                    video.play();
+                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-pause"></i> Pause';
+                } else {
+                    video.pause();
+                    document.getElementById('playPauseBtn').innerHTML = '<i class="fas fa-play"></i> Play';
+                }
+            }
+        }
+
+        function downloadCurrentFile() {
+            if (currentFile) {
+                window.open(`/api/download/${currentFile.id}`, '_blank');
+            }
+        }
+
+        function startPresentation() {
+            if (!currentFile) return;
+            
+            isPresenting = true;
+            presentationMode.classList.add('active');
+            
+            // Clone current media to presentation
+            const presentationContent = document.getElementById('presentationContent');
+            presentationContent.innerHTML = mediaViewer.innerHTML;
+            
+            // Remove fullscreen button from presentation
+            const fullscreenBtn = presentationContent.querySelector('.fullscreen-btn');
+            if (fullscreenBtn) fullscreenBtn.remove();
+            
+            // Style for presentation
+            const media = presentationContent.querySelector('video, iframe, img');
+            if (media) {
+                media.style.maxWidth = '90vw';
+                media.style.maxHeight = '90vh';
+                media.style.objectFit = 'contain';
+            }
+        }
+
+        function exitPresentation() {
+            isPresenting = false;
+            presentationMode.classList.remove('active');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                mediaViewer.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (isPresenting) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        navigateSlide(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigateSlide(1);
+                        break;
+                    case 'Escape':
+                        exitPresentation();
+                        break;
+                }
+            } else if (currentFile) {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        navigateSlide(-1);
+                        break;
+                    case 'ArrowRight':
+                        navigateSlide(1);
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        togglePlayPause();
+                        break;
+                    case 'f':
+                        toggleFullscreen();
+                        break;
+                    case 'p':
+                        startPresentation();
+                        break;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

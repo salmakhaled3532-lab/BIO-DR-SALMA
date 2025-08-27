@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test User Creation & Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-error { background: #f8d7da; color: #721c24; }
+        .status-info { background: #d1ecf1; color: #0c5460; }
+        .user-list {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .user-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 3px;
+            border-left: 4px solid #007bff;
+        }
+        .user-pending { border-left-color: #ffc107; }
+        .user-active { border-left-color: #28a745; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 User Creation & Activation Test</h1>
+        
+        <div id="status" class="status status-info">
+            Ready to test user creation and activation process...
+        </div>
+        
+        <div>
+            <button class="btn btn-primary" onclick="createTestUser()">Create Test User</button>
+            <button class="btn btn-success" onclick="activateTestUser()">Activate Test User</button>
+            <button class="btn btn-warning" onclick="showAllUsers()">Show All Users</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+        </div>
+        
+        <div id="userList" class="user-list">
+            <h3>Current Users:</h3>
+            <div id="userDisplay">No users found</div>
+        </div>
+        
+        <div>
+            <h3>Quick Actions:</h3>
+            <button class="btn btn-primary" onclick="goToRegister()">Go to Register Page</button>
+            <button class="btn btn-primary" onclick="goToLogin()">Go to Login Page</button>
+            <button class="btn btn-primary" onclick="goToAdmin()">Go to Admin Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        let testUserId = null;
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status status-${type}`;
+            statusDiv.textContent = message;
+        }
+
+        function createTestUser() {
+            const testUser = {
+                id: Date.now(),
+                fullName: 'Test Student User',
+                email: 'test.student@example.com',
+                username: 'teststudent',
+                password: 'test123',
+                role: 'student',
+                grade: '10',
+                program: 'EST',
+                status: 'pending',
+                registrationDate: new Date().toISOString()
+            };
+
+            // Add to pending users
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
+            
+            // Check if test user already exists
+            const existingUser = pendingUsers.find(u => u.username === 'teststudent');
+            if (existingUser) {
+                updateStatus('Test user already exists!', 'error');
+                testUserId = existingUser.id;
+                showAllUsers();
+                return;
+            }
+
+            pendingUsers.push(testUser);
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            testUserId = testUser.id;
+
+            // Add admin notification
+            const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+            notifications.push({
+                id: Date.now(),
+                type: 'new_registration',
+                message: `New student registration: ${testUser.fullName} (${testUser.username})`,
+                timestamp: new Date().toISOString(),
+                read: false,
+                userId: testUser.id
+            });
+            localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+
+            updateStatus(`✅ Test user created successfully! ID: ${testUserId}`, 'success');
+            showAllUsers();
+        }
+
+        function activateTestUser() {
+            if (!testUserId) {
+                updateStatus('❌ No test user to activate! Create one first.', 'error');
+                return;
+            }
+
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            
+            console.log('Before activation:');
+            console.log('Pending users:', pendingUsers);
+            console.log('Registered users:', registeredUsers);
+            console.log('Looking for user ID:', testUserId);
+
+            const userIndex = pendingUsers.findIndex(user => user.id == testUserId);
+            console.log('User index found:', userIndex);
+
+            if (userIndex !== -1) {
+                const user = pendingUsers[userIndex];
+                console.log('Found user:', user);
+                
+                user.status = 'active';
+                
+                // Move from pending to registered
+                registeredUsers.push(user);
+                pendingUsers.splice(userIndex, 1);
+                
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+                
+                console.log('After activation:');
+                console.log('Pending users:', JSON.parse(localStorage.getItem('pendingUsers') || '[]'));
+                console.log('Registered users:', JSON.parse(localStorage.getItem('registeredUsers') || '[]'));
+                
+                // Mark notification as read
+                const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+                const updated = notifications.map(n => 
+                    n.userId == testUserId ? {...n, read: true} : n
+                );
+                localStorage.setItem('adminNotifications', JSON.stringify(updated));
+                
+                updateStatus(`✅ User ${user.fullName} activated successfully!`, 'success');
+                showAllUsers();
+            } else {
+                updateStatus(`❌ Test user not found in pending users! ID: ${testUserId}`, 'error');
+                console.error('User not found. Available pending users:', pendingUsers.map(u => ({id: u.id, name: u.fullName})));
+            }
+        }
+
+        function showAllUsers() {
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            
+            const userDisplay = document.getElementById('userDisplay');
+            
+            if (pendingUsers.length === 0 && registeredUsers.length === 0) {
+                userDisplay.innerHTML = 'No users found';
+                return;
+            }
+
+            let html = '';
+            
+            if (pendingUsers.length > 0) {
+                html += '<h4>📋 Pending Users:</h4>';
+                pendingUsers.forEach(user => {
+                    html += `<div class="user-item user-pending">
+                        <strong>${user.fullName}</strong> (${user.username}) - ${user.email}
+                        <br>Status: ${user.status} | Role: ${user.role} | ID: ${user.id}
+                    </div>`;
+                });
+            }
+            
+            if (registeredUsers.length > 0) {
+                html += '<h4>✅ Active Users:</h4>';
+                registeredUsers.forEach(user => {
+                    html += `<div class="user-item user-active">
+                        <strong>${user.fullName}</strong> (${user.username}) - ${user.email}
+                        <br>Status: ${user.status} | Role: ${user.role} | ID: ${user.id}
+                    </div>`;
+                });
+            }
+            
+            userDisplay.innerHTML = html;
+            
+            updateStatus(`📊 Found ${pendingUsers.length} pending and ${registeredUsers.length} active users`, 'info');
+        }
+
+        function clearAllData() {
+            if (confirm('⚠️ This will clear ALL user data! Are you sure?')) {
+                localStorage.removeItem('pendingUsers');
+                localStorage.removeItem('registeredUsers');
+                localStorage.removeItem('adminNotifications');
+                localStorage.removeItem('currentUser');
+                testUserId = null;
+                updateStatus('🗑️ All user data cleared!', 'warning');
+                showAllUsers();
+            }
+        }
+
+        function goToRegister() {
+            window.open('/register', '_blank');
+        }
+
+        function goToLogin() {
+            window.open('/login', '_blank');
+        }
+
+        function goToAdmin() {
+            // Set admin user for testing
+            localStorage.setItem('currentUser', JSON.stringify({
+                username: 'admin',
+                role: 'admin',
+                name: 'Dr. Salma Khaled'
+            }));
+            window.open('/admin-dashboard', '_blank');
+        }
+
+        // Initialize display
+        showAllUsers();
+    </script>
+</body>
+</html>

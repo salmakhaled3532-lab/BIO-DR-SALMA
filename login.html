@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Dr. Salma Khaled Biology Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-header {
+            margin-bottom: 30px;
+        }
+        
+        .login-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .login-header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .register-link {
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .demo-credentials {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        .demo-credentials h4 {
+            margin: 0 0 10px 0;
+            color: #2c5aa0;
+        }
+        
+        .demo-credentials p {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        
+        .back-to-home {
+            margin-top: 20px;
+        }
+        
+        .back-to-home a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .back-to-home a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1><i class="fas fa-microscope"></i> Login</h1>
+                <p>Dr. Salma Khaled Biology Platform</p>
+            </div>
+            
+            <div class="demo-credentials">
+                <h4>Demo Credentials:</h4>
+                <p><strong>Admin:</strong> admin / admin123</p>
+                <p><strong>Teacher:</strong> teacher / teacher123</p>
+                <p><strong>Student:</strong> student / student123</p>
+            </div>
+            
+            <div id="alertContainer"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" id="loginBtn" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+            
+            <div class="register-link">
+                Don't have an account? <a href="/register">Register here</a>
+            </div>
+            
+            <div class="back-to-home">
+                <a href="/"><i class="fas fa-arrow-left"></i> Back to Homepage</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            
+            // Initialize admin user if not exists
+            initializeAdminUser();
+            
+            // Check if already logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                showAlert(`Welcome back, ${user.name}!`, 'success');
+                setTimeout(() => {
+                    redirectToDashboard(user.role);
+                }, 1500);
+            }
+            
+            loginForm.addEventListener('submit', handleLogin);
+        });
+
+        function initializeAdminUser() {
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const existingAdmin = registeredUsers.find(user => user.username === 'admin');
+            
+            if (!existingAdmin) {
+                const adminUser = {
+                    id: 1,
+                    fullName: 'Dr. Salma Khaled',
+                    email: 'dr.salma.khaled@bioplatform.com',
+                    username: 'admin',
+                    password: 'admin123',
+                    role: 'admin',
+                    status: 'active',
+                    registrationDate: new Date().toISOString()
+                };
+                
+                registeredUsers.push(adminUser);
+                localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                console.log('Admin user created: admin/admin123');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Disable button and show loading
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+            
+            // Reset button after delay
+            setTimeout(() => {
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+            }, 2000);
+            
+            // Authenticate user
+            authenticateUser(username, password);
+        }
+
+        function authenticateUser(username, password) {
+            // Check registered users first
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
+            
+            // Demo credentials
+            const demoUsers = {
+                'admin': { password: 'admin123', role: 'admin', redirect: '/admin-dashboard', status: 'active', name: 'Dr. Salma Khaled' },
+                'teacher': { password: 'teacher123', role: 'teacher', redirect: '/upload', status: 'active', name: 'Teacher' },
+                'student': { password: 'student123', role: 'student', redirect: '/lectures', status: 'active', name: 'Student' }
+            };
+
+            // Check registered users
+            const registeredUser = registeredUsers.find(user => user.username === username && user.password === password);
+            if (registeredUser) {
+                if (registeredUser.status === 'active') {
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        username: username,
+                        role: registeredUser.role,
+                        name: registeredUser.fullName
+                    }));
+                    
+                    const redirect = registeredUser.role === 'student' ? '/lectures' : 
+                                   registeredUser.role === 'admin' ? '/admin-dashboard' : '/upload';
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = redirect;
+                    }, 1500);
+                    return;
+                } else {
+                    showAlert('Your account is inactive. Please contact admin.', 'error');
+                    return;
+                }
+            }
+
+            // Check pending users
+            const pendingUser = pendingUsers.find(user => user.username === username && user.password === password);
+            if (pendingUser) {
+                showAlert('Your account is pending admin approval. Please wait for activation.', 'error');
+                return;
+            }
+
+            // Check demo users
+            if (demoUsers[username] && demoUsers[username].password === password) {
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: username,
+                    role: demoUsers[username].role,
+                    name: demoUsers[username].name
+                }));
+                
+                showAlert('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = demoUsers[username].redirect;
+                }, 1500);
+            } else {
+                showAlert('Invalid username or password!', 'error');
+            }
+        }
+
+        function redirectToDashboard(role) {
+            switch(role) {
+                case 'admin':
+                    window.location.href = '/admin-dashboard';
+                    break;
+                case 'teacher':
+                    window.location.href = '/upload';
+                    break;
+                case 'student':
+                    window.location.href = '/lectures';
+                    break;
+                default:
+                    window.location.href = '/';
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}" style="display: block;">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            // Auto-hide error alerts
+            if (type === 'error') {
+                setTimeout(() => {
+                    alertContainer.innerHTML = '';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Dr. Salma Biology Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .register-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        
+        .register-header {
+            margin-bottom: 30px;
+        }
+        
+        .register-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .register-header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+        }
+        
+        .login-link {
+            margin-top: 20px;
+            color: #7f8c8d;
+        }
+        
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1><i class="fas fa-graduation-cap"></i> Register</h1>
+                <p>Join Dr. Salma's Biology Platform</p>
+            </div>
+            
+            <div id="alert" class="alert"></div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select your role</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="gradeGroup" style="display: none;">
+                    <label for="grade">Grade Level</label>
+                    <select id="grade" name="grade">
+                        <option value="">Select grade</option>
+                        <option value="9">Grade 9</option>
+                        <option value="10">Grade 10</option>
+                        <option value="11">Grade 11</option>
+                        <option value="12">Grade 12</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="programGroup" style="display: none;">
+                    <label for="program">Program</label>
+                    <select id="program" name="program">
+                        <option value="">Select program</option>
+                        <option value="EST">EST</option>
+                        <option value="ACT">ACT</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-register">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+            
+            <div class="login-link">
+                Already have an account? <a href="/login">Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide grade and program fields based on role
+        document.getElementById('role').addEventListener('change', function() {
+            const role = this.value;
+            const gradeGroup = document.getElementById('gradeGroup');
+            const programGroup = document.getElementById('programGroup');
+            
+            if (role === 'student') {
+                gradeGroup.style.display = 'block';
+                programGroup.style.display = 'block';
+                document.getElementById('grade').required = true;
+                document.getElementById('program').required = true;
+            } else {
+                gradeGroup.style.display = 'none';
+                programGroup.style.display = 'none';
+                document.getElementById('grade').required = false;
+                document.getElementById('program').required = false;
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Validate passwords match
+            if (data.password !== data.confirmPassword) {
+                showAlert('Passwords do not match!', 'error');
+                return;
+            }
+            
+            // Validate password strength
+            if (data.password.length < 6) {
+                showAlert('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+            
+            // Store pending registration data
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers') || '[]');
+            const newUser = {
+                id: Date.now(),
+                fullName: data.fullName,
+                email: data.email,
+                username: data.username,
+                password: data.password,
+                role: data.role,
+                grade: data.grade || null,
+                program: data.program || null,
+                status: data.role === 'student' ? 'pending' : 'active',
+                registrationDate: new Date().toISOString()
+            };
+            
+            // Check if username already exists
+            const existingUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+            const allUsers = [...existingUsers, ...pendingUsers];
+            if (allUsers.find(user => user.username === data.username)) {
+                showAlert('Username already exists! Please choose a different username.', 'error');
+                return;
+            }
+            
+            // Simulate registration
+            setTimeout(() => {
+                if (data.role === 'student') {
+                    // Add to pending users for admin approval
+                    pendingUsers.push(newUser);
+                    localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+                    
+                    // Add admin notification
+                    const notifications = JSON.parse(localStorage.getItem('adminNotifications') || '[]');
+                    notifications.push({
+                        id: Date.now(),
+                        type: 'new_registration',
+                        message: `New student registration: ${data.fullName} (${data.username})`,
+                        timestamp: new Date().toISOString(),
+                        read: false,
+                        userId: newUser.id
+                    });
+                    localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+                    
+                    showAlert('Registration submitted! Your account is pending admin approval. You will be notified once activated.', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    // Teachers are automatically approved
+                    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+                    registeredUsers.push(newUser);
+                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+                    
+                    showAlert('Registration successful! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            }, 1000);
+        });
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            if (type === 'error') {
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

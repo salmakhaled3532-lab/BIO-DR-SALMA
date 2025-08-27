@@ -1,0 +1,421 @@
+<!-- Users Management Header -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-users me-2 text-primary"></i>
+        User Management
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#bulkActionModal">
+                <i class="fas fa-tasks me-1"></i>
+                Bulk Actions
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-user-plus me-1"></i>
+            Add User
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="/admin/users" class="row g-3">
+            <div class="col-md-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" name="role">
+                    <option value="">All Roles</option>
+                    <option value="admin" {{#if (eq filters.role 'admin')}}selected{{/if}}>Admin</option>
+                    <option value="teacher" {{#if (eq filters.role 'teacher')}}selected{{/if}}>Teacher</option>
+                    <option value="student" {{#if (eq filters.role 'student')}}selected{{/if}}>Student</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="grade" class="form-label">Grade</label>
+                <select class="form-select" id="grade" name="grade">
+                    <option value="">All Grades</option>
+                    <option value="9" {{#if (eq filters.grade '9')}}selected{{/if}}>Grade 9</option>
+                    <option value="10" {{#if (eq filters.grade '10')}}selected{{/if}}>Grade 10</option>
+                    <option value="11" {{#if (eq filters.grade '11')}}selected{{/if}}>Grade 11</option>
+                    <option value="12" {{#if (eq filters.grade '12')}}selected{{/if}}>Grade 12</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="program" class="form-label">Program</label>
+                <select class="form-select" id="program" name="program">
+                    <option value="">All Programs</option>
+                    <option value="EST" {{#if (eq filters.program 'EST')}}selected{{/if}}>EST</option>
+                    <option value="ACT" {{#if (eq filters.program 'ACT')}}selected{{/if}}>ACT</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="search" class="form-label">Search</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Name or email..." value="{{filters.search}}">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-table me-2"></i>
+            Users List ({{users.length}} total)
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Grade/Program</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each users}}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input user-checkbox" value="{{id}}">
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2">
+                                    {{substring name 0 1}}
+                                </div>
+                                <div>
+                                    <strong>{{name}}</strong>
+                                    {{#if phone}}
+                                    <br><small class="text-muted">{{phone}}</small>
+                                    {{/if}}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{email}}</td>
+                        <td>
+                            {{#if (eq role 'admin')}}
+                                <span class="badge bg-danger">Admin</span>
+                            {{else if (eq role 'teacher')}}
+                                <span class="badge bg-primary">Teacher</span>
+                            {{else}}
+                                <span class="badge bg-success">Student</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{#if grade}}
+                                <span class="badge bg-info">Grade {{grade}}</span>
+                                {{#if program}}
+                                <span class="badge bg-secondary">{{program}}</span>
+                                {{/if}}
+                            {{else}}
+                                <span class="text-muted">N/A</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{#if is_active}}
+                                <span class="badge bg-success">Active</span>
+                            {{else}}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            {{#if last_login}}
+                                <small>{{formatDateTime last_login}}</small>
+                            {{else}}
+                                <span class="text-muted">Never</span>
+                            {{/if}}
+                        </td>
+                        <td>
+                            <small>{{formatDate created_at}}</small>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary btn-sm" 
+                                        onclick="viewUser({{id}})" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" 
+                                        onclick="editUser({{id}})" title="Edit User">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {{#unless (eq role 'admin')}}
+                                <button class="btn btn-outline-danger btn-sm" 
+                                        onclick="toggleUserStatus({{id}}, {{is_active}})" 
+                                        title="{{#if is_active}}Deactivate{{else}}Activate{{/if}}">
+                                    <i class="fas fa-{{#if is_active}}ban{{else}}check{{/if}}"></i>
+                                </button>
+                                {{/unless}}
+                            </div>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Add New User
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addUserForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="userName" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="userName" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userEmail" class="form-label">Email Address *</label>
+                            <input type="email" class="form-control" id="userEmail" name="email" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="userRole" class="form-label">Role *</label>
+                            <select class="form-select" id="userRole" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="teacher">Teacher</option>
+                                <option value="student">Student</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userPhone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="userPhone" name="phone">
+                        </div>
+                    </div>
+                    <div class="row" id="studentFields" style="display: none;">
+                        <div class="col-md-6 mb-3">
+                            <label for="userGrade" class="form-label">Grade</label>
+                            <select class="form-select" id="userGrade" name="grade">
+                                <option value="">Select Grade</option>
+                                <option value="9">Grade 9</option>
+                                <option value="10">Grade 10</option>
+                                <option value="11">Grade 11</option>
+                                <option value="12">Grade 12</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="userProgram" class="form-label">Program</label>
+                            <select class="form-select" id="userProgram" name="program">
+                                <option value="">Select Program</option>
+                                <option value="EST">EST</option>
+                                <option value="ACT">ACT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="userPassword" class="form-label">Password *</label>
+                        <input type="password" class="form-control" id="userPassword" name="password" required>
+                        <div class="form-text">Minimum 6 characters</div>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sendWelcomeEmail" name="sendWelcomeEmail" checked>
+                        <label class="form-check-label" for="sendWelcomeEmail">
+                            Send welcome email with login credentials
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>
+                        Create User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user me-2"></i>
+                    User Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailsContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2c5aa0, #4a90e2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide student fields based on role selection
+    document.getElementById('userRole').addEventListener('change', function() {
+        const studentFields = document.getElementById('studentFields');
+        if (this.value === 'student') {
+            studentFields.style.display = 'block';
+            document.getElementById('userGrade').required = true;
+            document.getElementById('userProgram').required = true;
+        } else {
+            studentFields.style.display = 'none';
+            document.getElementById('userGrade').required = false;
+            document.getElementById('userProgram').required = false;
+        }
+    });
+
+    // Select all checkbox functionality
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+
+    // Add user form submission
+    document.getElementById('addUserForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const userData = Object.fromEntries(formData.entries());
+        
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('User created successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + (result.error || 'Failed to create user'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    });
+});
+
+// User management functions
+function viewUser(userId) {
+    fetch(`/api/users/${userId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.user) {
+                const user = data.user;
+                document.getElementById('userDetailsContent').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Personal Information</h6>
+                            <p><strong>Name:</strong> ${user.name}</p>
+                            <p><strong>Email:</strong> ${user.email}</p>
+                            <p><strong>Phone:</strong> ${user.phone || 'Not provided'}</p>
+                            <p><strong>Role:</strong> <span class="badge bg-primary">${user.role}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Academic Information</h6>
+                            <p><strong>Grade:</strong> ${user.grade || 'N/A'}</p>
+                            <p><strong>Program:</strong> ${user.program || 'N/A'}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-${user.is_active ? 'success' : 'secondary'}">
+                                    ${user.is_active ? 'Active' : 'Inactive'}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Activity</h6>
+                            <p><strong>Created:</strong> ${formatDate(user.created_at)}</p>
+                            <p><strong>Last Login:</strong> ${user.last_login ? formatDate(user.last_login) : 'Never'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Statistics</h6>
+                            <p><strong>Materials Accessed:</strong> ${user.materials_count || 0}</p>
+                            <p><strong>Sessions Attended:</strong> ${user.sessions_count || 0}</p>
+                        </div>
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('userDetailsModal')).show();
+            }
+        })
+        .catch(error => {
+            alert('Error loading user details: ' + error.message);
+        });
+}
+
+function editUser(userId) {
+    // Implementation for edit user functionality
+    alert('Edit user functionality - to be implemented');
+}
+
+function toggleUserStatus(userId, currentStatus) {
+    const action = currentStatus ? 'deactivate' : 'activate';
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        fetch(`/api/users/${userId}/toggle-status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_active: !currentStatus })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error.message);
+        });
+    }
+}
+</script>
